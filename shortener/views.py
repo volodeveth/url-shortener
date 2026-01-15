@@ -105,6 +105,10 @@ def dashboard(request):
         .annotate(count=Count('id'))
     )
 
+    # Calculate links remaining
+    links_limit = user.plan_config['links_limit']
+    links_remaining = max(0, links_limit - total_links) if links_limit != -1 else 0
+
     context = {
         'links': links,
         'total_links': total_links,
@@ -114,6 +118,7 @@ def dashboard(request):
         'device_stats': list(device_stats),
         'plan_config': user.plan_config,
         'can_create': user.can_create_link(),
+        'links_remaining': links_remaining,
     }
 
     return render(request, 'shortener/dashboard.html', context)

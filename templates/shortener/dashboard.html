@@ -57,7 +57,7 @@
                 </div>
                 <div class="ml-4">
                     <p class="text-sm text-gray-500">Plan</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ user.get_plan_display }}</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ plan_config.name }}</p>
                 </div>
             </div>
         </div>
@@ -72,7 +72,7 @@
                 <div class="ml-4">
                     <p class="text-sm text-gray-500">Links Left</p>
                     <p class="text-2xl font-bold text-gray-900">
-                        {% if plan_config.links_limit == -1 %}∞{% else %}{{ plan_config.links_limit|add:"-"|add:total_links|abs }}{% endif %}
+                        {% if plan_config.links_limit == -1 %}∞{% else %}{{ links_remaining }}{% endif %}
                     </p>
                 </div>
             </div>
