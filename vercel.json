@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate --noinput",
+  "buildCommand": "pip install -r requirements.txt && python build_vercel.py",
   "builds": [
     {
       "src": "core/wsgi.py",
