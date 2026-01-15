@@ -1,0 +1,310 @@
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="bg-gradient-to-br from-blue-600 to-purple-700 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div class="text-center">
+            <h1 class="text-4xl md:text-6xl font-bold mb-6">
+                Shorten Your Links,<br>
+                <span class="text-yellow-300">Expand Your Reach</span>
+            </h1>
+            <p class="text-xl text-blue-100 mb-10 max-w-2xl mx-auto">
+                Create short, memorable links in seconds. Track clicks, generate QR codes, and analyze your audience - all for free.
+            </p>
+
+            <!-- Quick Shortener Form -->
+            <form method="post" class="max-w-2xl mx-auto" id="shorten-form">
+                {% csrf_token %}
+                <div class="flex shadow-2xl rounded-lg overflow-hidden">
+                    <input
+                        type="url"
+                        name="url"
+                        required
+                        class="flex-1 px-6 py-4 text-gray-900 text-lg focus:outline-none"
+                        placeholder="Paste your long URL here..."
+                    >
+                    <button
+                        type="submit"
+                        class="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold px-8 py-4 transition"
+                    >
+                        Shorten
+                    </button>
+                </div>
+            </form>
+
+            <!-- Result (shown after shortening) -->
+            <div id="result" class="hidden mt-6 bg-white/10 backdrop-blur rounded-lg p-6 max-w-2xl mx-auto">
+                <p class="text-sm text-blue-200 mb-2">Your shortened URL:</p>
+                <div class="flex items-center justify-center space-x-4">
+                    <a id="short-url" href="#" target="_blank" class="text-2xl font-bold text-yellow-300 hover:underline"></a>
+                    <button onclick="copyUrl()" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded transition">
+                        Copy
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Section -->
+<div class="bg-white py-12 border-b">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <div>
+                <div class="text-4xl font-bold text-blue-600">{{ stats.total_links|default:"0" }}+</div>
+                <div class="text-gray-500 mt-1">Links Created</div>
+            </div>
+            <div>
+                <div class="text-4xl font-bold text-purple-600">{{ stats.total_clicks|default:"0" }}+</div>
+                <div class="text-gray-500 mt-1">Total Clicks</div>
+            </div>
+            <div>
+                <div class="text-4xl font-bold text-green-600">100%</div>
+                <div class="text-gray-500 mt-1">Uptime</div>
+            </div>
+            <div>
+                <div class="text-4xl font-bold text-orange-600">Free</div>
+                <div class="text-gray-500 mt-1">To Start</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="py-20 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">
+            Everything You Need
+        </h2>
+
+        <div class="grid md:grid-cols-3 gap-8">
+            <!-- Feature 1 -->
+            <div class="bg-white p-8 rounded-xl shadow-sm hover:shadow-md transition">
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">Short Links</h3>
+                <p class="text-gray-600">Create memorable short URLs instantly. Custom aliases available for Pro users.</p>
+            </div>
+
+            <!-- Feature 2 -->
+            <div class="bg-white p-8 rounded-xl shadow-sm hover:shadow-md transition">
+                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">Analytics</h3>
+                <p class="text-gray-600">Track clicks, devices, browsers, and locations. Know your audience.</p>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="bg-white p-8 rounded-xl shadow-sm hover:shadow-md transition">
+                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">QR Codes</h3>
+                <p class="text-gray-600">Generate QR codes for any link. Perfect for print and offline marketing.</p>
+            </div>
+
+            <!-- Feature 4 -->
+            <div class="bg-white p-8 rounded-xl shadow-sm hover:shadow-md transition">
+                <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">API Access</h3>
+                <p class="text-gray-600">Integrate link shortening into your apps with our REST API (Pro plan).</p>
+            </div>
+
+            <!-- Feature 5 -->
+            <div class="bg-white p-8 rounded-xl shadow-sm hover:shadow-md transition">
+                <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">Secure</h3>
+                <p class="text-gray-600">All links are encrypted and protected. Enterprise-grade security.</p>
+            </div>
+
+            <!-- Feature 6 -->
+            <div class="bg-white p-8 rounded-xl shadow-sm hover:shadow-md transition">
+                <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">Lightning Fast</h3>
+                <p class="text-gray-600">Redirects happen in milliseconds. Zero delay for your visitors.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pricing Section -->
+<div class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-bold text-center text-gray-900 mb-4">Simple Pricing</h2>
+        <p class="text-center text-gray-600 mb-12">Start free, upgrade when you need more</p>
+
+        <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            <!-- Free Plan -->
+            <div class="border rounded-xl p-8 hover:shadow-lg transition">
+                <h3 class="text-xl font-bold text-gray-900">Free</h3>
+                <div class="mt-4 mb-6">
+                    <span class="text-4xl font-bold">$0</span>
+                    <span class="text-gray-500">/month</span>
+                </div>
+                <ul class="space-y-3 mb-8">
+                    <li class="flex items-center text-gray-600">
+                        <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        25 links
+                    </li>
+                    <li class="flex items-center text-gray-600">
+                        <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        7 days analytics
+                    </li>
+                    <li class="flex items-center text-gray-600">
+                        <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        QR codes
+                    </li>
+                </ul>
+                <a href="{% url 'signup' %}" class="block w-full text-center py-3 border-2 border-blue-600 text-blue-600 rounded-lg font-semibold hover:bg-blue-50 transition">
+                    Get Started
+                </a>
+            </div>
+
+            <!-- Pro Plan -->
+            <div class="border-2 border-blue-600 rounded-xl p-8 shadow-lg relative">
+                <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-semibold">
+                    Popular
+                </div>
+                <h3 class="text-xl font-bold text-gray-900">Pro</h3>
+                <div class="mt-4 mb-6">
+                    <span class="text-4xl font-bold">$9.99</span>
+                    <span class="text-gray-500">/month</span>
+                </div>
+                <ul class="space-y-3 mb-8">
+                    <li class="flex items-center text-gray-600">
+                        <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        500 links
+                    </li>
+                    <li class="flex items-center text-gray-600">
+                        <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        90 days analytics
+                    </li>
+                    <li class="flex items-center text-gray-600">
+                        <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        Custom aliases
+                    </li>
+                    <li class="flex items-center text-gray-600">
+                        <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        API access
+                    </li>
+                </ul>
+                <a href="{% url 'signup' %}" class="block w-full text-center py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition">
+                    Start Pro Trial
+                </a>
+            </div>
+
+            <!-- Business Plan -->
+            <div class="border rounded-xl p-8 hover:shadow-lg transition">
+                <h3 class="text-xl font-bold text-gray-900">Business</h3>
+                <div class="mt-4 mb-6">
+                    <span class="text-4xl font-bold">$29.99</span>
+                    <span class="text-gray-500">/month</span>
+                </div>
+                <ul class="space-y-3 mb-8">
+                    <li class="flex items-center text-gray-600">
+                        <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        Unlimited links
+                    </li>
+                    <li class="flex items-center text-gray-600">
+                        <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        1 year analytics
+                    </li>
+                    <li class="flex items-center text-gray-600">
+                        <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        Everything in Pro
+                    </li>
+                    <li class="flex items-center text-gray-600">
+                        <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        Priority support
+                    </li>
+                </ul>
+                <a href="{% url 'signup' %}" class="block w-full text-center py-3 border-2 border-blue-600 text-blue-600 rounded-lg font-semibold hover:bg-blue-50 transition">
+                    Contact Sales
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Copy URL function
+function copyUrl() {
+    const url = document.getElementById('short-url').href;
+    navigator.clipboard.writeText(url);
+    alert('Copied to clipboard!');
+}
+
+// AJAX form submission
+document.getElementById('shorten-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+
+    try {
+        const response = await fetch('/', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            document.getElementById('short-url').href = data.short_url;
+            document.getElementById('short-url').textContent = data.short_url;
+            document.getElementById('result').classList.remove('hidden');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+});
+</script>
+{% endblock %}

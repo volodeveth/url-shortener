@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-12">
+    <h1 class="text-3xl font-bold text-gray-900 mb-8">Account Settings</h1>
+
+    <!-- User Info -->
+    <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Profile</h2>
+        <div class="grid md:grid-cols-2 gap-6">
+            <div>
+                <label class="block text-sm text-gray-500">Username</label>
+                <p class="text-lg font-medium">{{ user.username }}</p>
+            </div>
+            <div>
+                <label class="block text-sm text-gray-500">Email</label>
+                <p class="text-lg font-medium">{{ user.email }}</p>
+            </div>
+            <div>
+                <label class="block text-sm text-gray-500">Member Since</label>
+                <p class="text-lg font-medium">{{ user.date_joined|date:"M d, Y" }}</p>
+            </div>
+            <div>
+                <label class="block text-sm text-gray-500">Total Links</label>
+                <p class="text-lg font-medium">{{ links_count }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Plan -->
+    <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Current Plan</h2>
+        <div class="flex items-center justify-between">
+            <div>
+                <span class="px-4 py-2 rounded-full text-lg font-semibold
+                    {% if user.plan == 'free' %}bg-gray-100{% elif user.plan == 'pro' %}bg-blue-100 text-blue-800{% else %}bg-purple-100 text-purple-800{% endif %}">
+                    {{ plan_config.name }}
+                </span>
+                <p class="text-gray-500 mt-2">
+                    {% if plan_config.links_limit == -1 %}Unlimited{% else %}{{ plan_config.links_limit }}{% endif %} links
+                    • {{ plan_config.clicks_tracking_days }} days analytics
+                </p>
+            </div>
+            {% if user.plan == 'free' %}
+            <a href="#" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">Upgrade</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- API Key -->
+    {% if user.has_api_access %}
+    <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">API Key</h2>
+        {% if user.api_key %}
+        <code class="block bg-gray-100 px-4 py-2 rounded font-mono text-sm mb-2">{{ user.api_key }}</code>
+        {% endif %}
+        <form method="post" action="{% url 'generate_api_key' %}">
+            {% csrf_token %}
+            <button type="submit" class="text-blue-600 hover:underline">
+                {% if user.api_key %}Regenerate{% else %}Generate{% endif %} API Key
+            </button>
+        </form>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

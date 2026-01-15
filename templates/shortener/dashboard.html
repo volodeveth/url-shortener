@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>
+            <p class="text-gray-500 mt-1">Welcome back, {{ user.username }}!</p>
+        </div>
+        <a href="{% url 'create_link' %}" class="bg-blue-600 text-white hover:bg-blue-700 px-6 py-3 rounded-lg font-semibold transition flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Create Link
+        </a>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="flex items-center">
+                <div class="p-3 bg-blue-100 rounded-lg">
+                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm text-gray-500">Total Links</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ total_links }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="flex items-center">
+                <div class="p-3 bg-purple-100 rounded-lg">
+                    <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"/>
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm text-gray-500">Total Clicks</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ total_clicks }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="flex items-center">
+                <div class="p-3 bg-green-100 rounded-lg">
+                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm text-gray-500">Plan</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ user.get_plan_display }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="flex items-center">
+                <div class="p-3 bg-orange-100 rounded-lg">
+                    <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm text-gray-500">Links Left</p>
+                    <p class="text-2xl font-bold text-gray-900">
+                        {% if plan_config.links_limit == -1 %}∞{% else %}{{ plan_config.links_limit|add:"-"|add:total_links|abs }}{% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Chart -->
+        <div class="lg:col-span-2 bg-white rounded-xl shadow-sm p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Clicks (Last 7 Days)</h2>
+            <canvas id="clicksChart" height="200"></canvas>
+        </div>
+
+        <!-- Device Stats -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Devices</h2>
+            <canvas id="deviceChart" height="200"></canvas>
+        </div>
+    </div>
+
+    <!-- Recent Links -->
+    <div class="mt-8 bg-white rounded-xl shadow-sm">
+        <div class="p-6 border-b">
+            <div class="flex justify-between items-center">
+                <h2 class="text-lg font-semibold text-gray-900">Recent Links</h2>
+                <a href="{% url 'links_list' %}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">View All</a>
+            </div>
+        </div>
+        <div class="divide-y">
+            {% for link in links %}
+            <div class="p-4 hover:bg-gray-50 transition">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1 min-w-0">
+                        <a href="{% url 'link_detail' link.short_code %}" class="text-blue-600 font-medium hover:underline">
+                            /{{ link.custom_alias|default:link.short_code }}
+                        </a>
+                        <p class="text-sm text-gray-500 truncate">{{ link.original_url }}</p>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="text-center">
+                            <p class="text-lg font-semibold text-gray-900">{{ link.clicks_count }}</p>
+                            <p class="text-xs text-gray-500">clicks</p>
+                        </div>
+                        <a href="{% url 'link_detail' link.short_code %}" class="text-gray-400 hover:text-gray-600">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="p-8 text-center text-gray-500">
+                <p>No links yet. Create your first short link!</p>
+                <a href="{% url 'create_link' %}" class="mt-4 inline-block text-blue-600 hover:underline">Create Link</a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Clicks Chart
+const clicksCtx = document.getElementById('clicksChart').getContext('2d');
+const clicksData = {{ clicks_by_day|safe }};
+
+new Chart(clicksCtx, {
+    type: 'line',
+    data: {
+        labels: clicksData.map(d => d.date),
+        datasets: [{
+            label: 'Clicks',
+            data: clicksData.map(d => d.count),
+            borderColor: 'rgb(59, 130, 246)',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            fill: true,
+            tension: 0.4,
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: false }
+        },
+        scales: {
+            y: { beginAtZero: true }
+        }
+    }
+});
+
+// Device Chart
+const deviceCtx = document.getElementById('deviceChart').getContext('2d');
+const deviceData = {{ device_stats|safe }};
+
+new Chart(deviceCtx, {
+    type: 'doughnut',
+    data: {
+        labels: deviceData.map(d => d.device_type || 'Unknown'),
+        datasets: [{
+            data: deviceData.map(d => d.count),
+            backgroundColor: [
+                'rgb(59, 130, 246)',
+                'rgb(147, 51, 234)',
+                'rgb(34, 197, 94)',
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { position: 'bottom' }
+        }
+    }
+});
+</script>
+{% endblock %}

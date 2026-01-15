@@ -1,0 +1,237 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ link.short_code }} - Link Details{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Back Button -->
+    <a href="{% url 'dashboard' %}" class="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        </svg>
+        Back to Dashboard
+    </a>
+
+    <!-- Link Info Card -->
+    <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+            <div class="flex-1">
+                <h1 class="text-2xl font-bold text-gray-900 mb-2">
+                    {% if link.title %}{{ link.title }}{% else %}{{ link.short_code }}{% endif %}
+                </h1>
+                <div class="flex items-center space-x-4 mb-4">
+                    <a href="{{ full_short_url }}" target="_blank" class="text-blue-600 font-medium hover:underline text-lg">
+                        {{ full_short_url }}
+                    </a>
+                    <button onclick="copyUrl('{{ full_short_url }}')" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/>
+                        </svg>
+                    </button>
+                </div>
+                <p class="text-gray-500 text-sm truncate max-w-2xl">
+                    Original: {{ link.original_url }}
+                </p>
+                <p class="text-gray-400 text-sm mt-2">
+                    Created: {{ link.created_at|date:"M d, Y H:i" }}
+                </p>
+            </div>
+
+            <!-- QR Code -->
+            <div class="mt-6 md:mt-0 md:ml-8 text-center">
+                <img src="{{ qr_code }}" alt="QR Code" class="w-32 h-32 mx-auto border rounded-lg">
+                <a href="{{ qr_code }}" download="qr-{{ link.short_code }}.png" class="text-sm text-blue-600 hover:underline mt-2 inline-block">
+                    Download QR
+                </a>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t">
+            <div class="text-center">
+                <p class="text-3xl font-bold text-gray-900">{{ link.clicks_count }}</p>
+                <p class="text-sm text-gray-500">Total Clicks</p>
+            </div>
+            <div class="text-center">
+                <p class="text-3xl font-bold text-gray-900">
+                    {% with recent_clicks.0 as last %}
+                        {% if last %}{{ last.clicked_at|timesince }} ago{% else %}-{% endif %}
+                    {% endwith %}
+                </p>
+                <p class="text-sm text-gray-500">Last Click</p>
+            </div>
+            <div class="text-center">
+                <p class="text-3xl font-bold {% if link.is_active %}text-green-600{% else %}text-red-600{% endif %}">
+                    {% if link.is_active %}Active{% else %}Inactive{% endif %}
+                </p>
+                <p class="text-sm text-gray-500">Status</p>
+            </div>
+            <div class="text-center">
+                <a href="{% url 'delete_link' link.short_code %}" class="text-red-600 hover:text-red-800">
+                    Delete Link
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <!-- Clicks Over Time -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Clicks (Last 30 Days)</h2>
+            <canvas id="clicksChart" height="200"></canvas>
+        </div>
+
+        <!-- Device Breakdown -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Devices</h2>
+            <canvas id="deviceChart" height="200"></canvas>
+        </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+        <!-- Browsers -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Top Browsers</h2>
+            <div class="space-y-3">
+                {% for stat in browser_stats %}
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">{{ stat.browser }}</span>
+                    <span class="font-semibold">{{ stat.count }}</span>
+                </div>
+                {% empty %}
+                <p class="text-gray-500">No data yet</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- OS -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Operating Systems</h2>
+            <div class="space-y-3">
+                {% for stat in os_stats %}
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">{{ stat.os }}</span>
+                    <span class="font-semibold">{{ stat.count }}</span>
+                </div>
+                {% empty %}
+                <p class="text-gray-500">No data yet</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Devices Table -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Device Types</h2>
+            <div class="space-y-3">
+                {% for stat in device_stats %}
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600 capitalize">{{ stat.device_type }}</span>
+                    <span class="font-semibold">{{ stat.count }}</span>
+                </div>
+                {% empty %}
+                <p class="text-gray-500">No data yet</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Clicks -->
+    <div class="bg-white rounded-xl shadow-sm">
+        <div class="p-6 border-b">
+            <h2 class="text-lg font-semibold text-gray-900">Recent Clicks</h2>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Device</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Browser</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">OS</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Referrer</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y">
+                    {% for click in recent_clicks %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ click.clicked_at|date:"M d, H:i" }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">
+                            {{ click.device_type }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {{ click.browser }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {{ click.os }}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500 truncate max-w-xs">
+                            {{ click.referrer|default:"Direct" }}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-8 text-center text-gray-500">
+                            No clicks recorded yet
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function copyUrl(url) {
+    navigator.clipboard.writeText(url);
+    alert('Copied to clipboard!');
+}
+
+// Clicks Chart
+const clicksCtx = document.getElementById('clicksChart').getContext('2d');
+const clicksData = {{ clicks_by_day|safe }};
+
+new Chart(clicksCtx, {
+    type: 'bar',
+    data: {
+        labels: clicksData.map(d => d.date),
+        datasets: [{
+            label: 'Clicks',
+            data: clicksData.map(d => d.count),
+            backgroundColor: 'rgba(59, 130, 246, 0.8)',
+            borderRadius: 4,
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true } }
+    }
+});
+
+// Device Chart
+const deviceCtx = document.getElementById('deviceChart').getContext('2d');
+const deviceData = {{ device_stats|safe }};
+
+new Chart(deviceCtx, {
+    type: 'doughnut',
+    data: {
+        labels: deviceData.map(d => d.device_type || 'Unknown'),
+        datasets: [{
+            data: deviceData.map(d => d.count),
+            backgroundColor: ['rgb(59, 130, 246)', 'rgb(147, 51, 234)', 'rgb(34, 197, 94)']
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { position: 'bottom' } }
+    }
+});
+</script>
+{% endblock %}
