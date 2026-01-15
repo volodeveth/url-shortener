@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ link.short_code }} - Link Details{% endblock %}
+{% block title %}{{ link.title|default:link.short_code }} - Link Analytics{% endblock %}
+{% block description %}View detailed analytics for your shortened link. Track clicks, devices, browsers, and referrers.{% endblock %}
 
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

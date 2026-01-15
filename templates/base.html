@@ -3,10 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}lilURL{% endblock %} - URL Shortener</title>
+    <title>{% block title %}lilURL{% endblock %} | Free URL Shortener</title>
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="{% block description %}lilURL - Free URL shortener with analytics, QR codes, and custom aliases. Track clicks, analyze your audience, and create memorable short links.{% endblock %}">
+    <meta name="keywords" content="url shortener, link shortener, short url, qr code generator, link analytics, custom short links">
+    <meta name="author" content="lilURL">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://lilurl.vercel.app{% block canonical %}{{ request.path }}{% endblock %}">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://lilurl.vercel.app{{ request.path }}">
+    <meta property="og:title" content="{% block og_title %}lilURL - Free URL Shortener{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Create short, memorable links in seconds. Track clicks, generate QR codes, and analyze your audience - all for free.{% endblock %}">
+    <meta property="og:image" content="https://lilurl.vercel.app/static/og-image.png">
+    <meta property="og:site_name" content="lilURL">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://lilurl.vercel.app{{ request.path }}">
+    <meta name="twitter:title" content="{% block twitter_title %}lilURL - Free URL Shortener{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}Create short, memorable links in seconds. Track clicks, generate QR codes, and analyze your audience.{% endblock %}">
+    <meta name="twitter:image" content="https://lilurl.vercel.app/static/og-image.png">
+
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#2563eb">
+    <meta name="msapplication-TileColor" content="#2563eb">
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232563eb' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1'/%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232563eb' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1'/%3E%3C/svg%3E">
 
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>

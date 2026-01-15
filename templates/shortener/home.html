@@ -1,6 +1,37 @@
 {% extends 'base.html' %}
 
-{% block title %}Home{% endblock %}
+{% block title %}Free URL Shortener with Analytics & QR Codes{% endblock %}
+{% block description %}Create short, memorable URLs for free. lilURL offers link analytics, QR code generation, custom aliases, and API access. Start shortening links in seconds.{% endblock %}
+{% block canonical %}/{% endblock %}
+{% block og_title %}lilURL - Free URL Shortener with Analytics{% endblock %}
+{% block og_description %}Shorten your links, track clicks, generate QR codes. Free forever with premium features available.{% endblock %}
+
+{% block extra_head %}
+<!-- Structured Data -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "lilURL",
+    "url": "https://lilurl.vercel.app",
+    "description": "Free URL shortener with analytics, QR codes, and custom aliases",
+    "applicationCategory": "UtilityApplication",
+    "operatingSystem": "Any",
+    "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+    },
+    "featureList": [
+        "URL Shortening",
+        "Click Analytics",
+        "QR Code Generation",
+        "Custom Aliases",
+        "API Access"
+    ]
+}
+</script>
+{% endblock %}
 
 {% block content %}
 <!-- Hero Section -->

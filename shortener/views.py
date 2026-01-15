@@ -4,14 +4,53 @@ URL Shortener Views
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.http import JsonResponse, HttpResponseRedirect
+from django.http import JsonResponse, HttpResponseRedirect, HttpResponse
 from django.db.models import Count, Q
 from django.db.models.functions import TruncDate
 from django.utils import timezone
+from django.views.decorators.cache import cache_page
 from datetime import timedelta
 
 from .models import Link, Click
 from .forms import LinkForm, QuickLinkForm
+
+
+def robots_txt(request):
+    """Serve robots.txt for SEO"""
+    content = """User-agent: *
+Allow: /
+Disallow: /dashboard/
+Disallow: /links/
+Disallow: /accounts/
+Disallow: /admin/
+
+Sitemap: https://lilurl.vercel.app/sitemap.xml
+"""
+    return HttpResponse(content, content_type='text/plain')
+
+
+def sitemap_xml(request):
+    """Serve sitemap.xml for SEO"""
+    content = """<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+        <loc>https://lilurl.vercel.app/</loc>
+        <changefreq>daily</changefreq>
+        <priority>1.0</priority>
+    </url>
+    <url>
+        <loc>https://lilurl.vercel.app/accounts/login/</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://lilurl.vercel.app/accounts/signup/</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.9</priority>
+    </url>
+</urlset>
+"""
+    return HttpResponse(content, content_type='application/xml')
 
 
 def home(request):
