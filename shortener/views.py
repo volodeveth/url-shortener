@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse, HttpResponseRedirect
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.db.models.functions import TruncDate
 from django.utils import timezone
 from datetime import timedelta
@@ -235,9 +235,9 @@ def links_list(request):
     search = request.GET.get('search', '')
     if search:
         links = links.filter(
-            models.Q(original_url__icontains=search) |
-            models.Q(title__icontains=search) |
-            models.Q(short_code__icontains=search)
+            Q(original_url__icontains=search) |
+            Q(title__icontains=search) |
+            Q(short_code__icontains=search)
         )
 
     return render(request, 'shortener/links_list.html', {

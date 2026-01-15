@@ -107,7 +107,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Internationalization
-LANGUAGE_CODE = 'uk'
+LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Europe/Kyiv'
 USE_I18N = True
 USE_TZ = True
@@ -189,3 +189,6 @@ PLANS = {
         'api_access': True,
     },
 }
+
+# Email (console for development, configure SMTP for production)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
