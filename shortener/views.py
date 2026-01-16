@@ -1,6 +1,7 @@
 """
 URL Shortener Views
 """
+import json
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -133,6 +134,12 @@ def dashboard(request):
         .order_by('date')
     )
 
+    # Convert dates to strings for JSON serialization
+    clicks_by_day_json = json.dumps([
+        {'date': item['date'].strftime('%Y-%m-%d'), 'count': item['count']}
+        for item in clicks_by_day
+    ])
+
     # Top links
     top_links = user.links.order_by('-clicks_count')[:5]
 
@@ -144,6 +151,9 @@ def dashboard(request):
         .annotate(count=Count('id'))
     )
 
+    # Convert to JSON for template
+    device_stats_json = json.dumps(list(device_stats))
+
     # Calculate links remaining
     links_limit = user.plan_config['links_limit']
     links_remaining = max(0, links_limit - total_links) if links_limit != -1 else 0
@@ -152,9 +162,9 @@ def dashboard(request):
         'links': links,
         'total_links': total_links,
         'total_clicks': total_clicks,
-        'clicks_by_day': list(clicks_by_day),
+        'clicks_by_day': clicks_by_day_json,
         'top_links': top_links,
-        'device_stats': list(device_stats),
+        'device_stats': device_stats_json,
         'plan_config': user.plan_config,
         'can_create': user.can_create_link(),
         'links_remaining': links_remaining,
@@ -218,6 +228,12 @@ def link_detail(request, code):
         .order_by('date')
     )
 
+    # Convert dates to strings for JSON serialization
+    clicks_by_day_json = json.dumps([
+        {'date': item['date'].strftime('%Y-%m-%d'), 'count': item['count']}
+        for item in clicks_by_day
+    ])
+
     browser_stats = (
         link.clicks
         .values('browser')
@@ -230,6 +246,9 @@ def link_detail(request, code):
         .values('device_type')
         .annotate(count=Count('id'))
     )
+
+    # Convert to JSON for template
+    device_stats_json = json.dumps(list(device_stats))
 
     os_stats = (
         link.clicks
@@ -246,9 +265,10 @@ def link_detail(request, code):
     context = {
         'link': link,
         'qr_code': qr_code,
-        'clicks_by_day': list(clicks_by_day),
+        'clicks_by_day': clicks_by_day_json,
         'browser_stats': list(browser_stats),
-        'device_stats': list(device_stats),
+        'device_stats': device_stats_json,
+        'device_stats_list': list(device_stats),
         'os_stats': list(os_stats),
         'recent_clicks': recent_clicks,
         'full_short_url': request.build_absolute_uri(link.short_url),
